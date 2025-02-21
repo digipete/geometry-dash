@@ -66,6 +66,8 @@
             const gameOverText = document.getElementById("gameOverText");
 
             startButton.addEventListener("click", startGame);
+            window.addEventListener("keydown", jump);
+            window.addEventListener("touchstart", jump); // Enable touch support
 
             function startGame() {
                 score = 0;
@@ -80,7 +82,7 @@
             }
 
             function jump(event) {
-                if (event.code === "Space" && !player.jumping && running) {
+                if (!player.jumping && running) {
                     player.velocityY = -15;
                     player.jumping = true;
                 }
@@ -154,8 +156,6 @@
 
                 requestAnimationFrame(update);
             }
-
-            window.addEventListener("keydown", jump);
         });
     </script>
 </body>
