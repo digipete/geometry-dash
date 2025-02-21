@@ -90,7 +90,9 @@
 
             function spawnObstacle() {
                 if (frames % 100 === 0) { 
-                    obstacles.push({ x: canvas.width, y: 300, width: 40, height: 40 });
+                    let heightOptions = [200, 250, 300]; // Different heights for obstacles
+                    let obstacleHeight = heightOptions[Math.floor(Math.random() * heightOptions.length)];
+                    obstacles.push({ x: canvas.width, y: obstacleHeight, width: 40, height: 40 });
                 }
             }
 
