@@ -53,7 +53,7 @@
             canvas.width = 800;
             canvas.height = 400;
 
-            let player = { x: 50, y: 300, width: 30, height: 30, velocityY: 0, jumping: false };
+            let player = { x: 50, y: 300, width: 30, height: 30, velocityY: 0, jumping: false, onBlock: false };
             let gravity = 1;
             let obstacles = [];
             let spikes = [];
@@ -88,6 +88,7 @@
                 if (!player.jumping && running) {
                     player.velocityY = -15;
                     player.jumping = true;
+                    player.onBlock = false;
                 }
             }
 
@@ -96,12 +97,12 @@
                     let heightOptions = [200, 250, 300]; // Different heights for obstacles
                     let obstacleHeight = heightOptions[Math.floor(Math.random() * heightOptions.length)];
                     let isBlackHole = Math.random() < 0.1; // 10% chance of being a black hole
-                    let color = isBlackHole ? "green" : "red"; // Black hole is now green
+                    let color = isBlackHole ? "green" : "red";
                     let obstacleHeightFinal = isBlackHole ? 80 : 40; // Black hole is twice the height
-                    obstacles.push({ x: canvas.width, y: obstacleHeight, width: 40, height: obstacleHeightFinal, color: color, isBlackHole: isBlackHole });
+                    obstacles.push({ x: canvas.width, y: obstacleHeight, width: 40, height: obstacleHeightFinal, color: color, isBlackHole: isBlackHole, scored: false });
                 }
-                if (Math.random() < 0.02) { // 2% chance of spawning a spike
-                    spikes.push({ x: canvas.width, y: 300, width: 20, height: 20 });
+                if (Math.random() < 0.005) { // Lower chance for spikes
+                    spikes.push({ x: canvas.width, y: 320, width: 20, height: 20 }); // Lower height for easier jumps
                 }
             }
 
@@ -122,6 +123,7 @@
                 if (player.y >= 300) {
                     player.y = 300;
                     player.jumping = false;
+                    player.onBlock = false;
                 }
 
                 // Increase speed after every 5 points scored
@@ -138,25 +140,30 @@
                     ctx.fillStyle = obs.color;
                     ctx.fillRect(obs.x, obs.y, obs.width, obs.height);
 
-                    // Collision detection
+                    if (!obs.scored && obs.x + obs.width < player.x) {
+                        score++;
+                        obs.scored = true;
+                    }
+
                     if (
-                        player.x < obs.x + obs.width &&
                         player.x + player.width > obs.x &&
+                        player.x < obs.x + obs.width &&
+                        player.y + player.height > obs.y &&
+                        player.y + player.height - 5 < obs.y + obs.height
+                    ) {
+                        player.y = obs.y - player.height;
+                        player.velocityY = 0;
+                        player.onBlock = true;
+                    } else if (
+                        player.x + player.width > obs.x &&
+                        player.x < obs.x + obs.width &&
                         player.y < obs.y + obs.height &&
                         player.y + player.height > obs.y
                     ) {
-                        if (obs.isBlackHole) {
+                        attempts--;
+                        if (attempts <= 0) {
                             gameOver();
                             return;
-                        } else {
-                            attempts--;
-                            if (attempts <= 0) {
-                                gameOver();
-                                return;
-                            } else {
-                                obstacles = []; 
-                                player.y = 300; 
-                            }
                         }
                     }
                 }
@@ -166,20 +173,6 @@
                     spike.x -= gameSpeed * 1.5;
                     ctx.fillStyle = "gray";
                     ctx.fillRect(spike.x, spike.y, spike.width, spike.height);
-
-                    // Collision detection with spikes
-                    if (
-                        player.x < spike.x + spike.width &&
-                        player.x + player.width > spike.x &&
-                        player.y < spike.y + spike.height &&
-                        player.y + player.height > spike.y
-                    ) {
-                        attempts--;
-                        if (attempts <= 0) {
-                            gameOver();
-                            return;
-                        }
-                    }
                 }
 
                 ctx.fillStyle = "white";
