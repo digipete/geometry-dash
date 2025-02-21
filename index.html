@@ -96,11 +96,11 @@
                     let heightOptions = [200, 250, 300]; // Different heights for obstacles
                     let obstacleHeight = heightOptions[Math.floor(Math.random() * heightOptions.length)];
                     let isBlackHole = Math.random() < 0.1; // 10% chance of being a black hole
-                    let color = isBlackHole ? "black" : "red";
+                    let color = isBlackHole ? "green" : "red"; // Black hole is now green
                     let obstacleHeightFinal = isBlackHole ? 80 : 40; // Black hole is twice the height
                     obstacles.push({ x: canvas.width, y: obstacleHeight, width: 40, height: obstacleHeightFinal, color: color, isBlackHole: isBlackHole });
                 }
-                if (Math.random() < 0.05) { // 5% chance of spawning a spike
+                if (Math.random() < 0.02) { // 2% chance of spawning a spike
                     spikes.push({ x: canvas.width, y: 300, width: 20, height: 20 });
                 }
             }
@@ -166,6 +166,20 @@
                     spike.x -= gameSpeed * 1.5;
                     ctx.fillStyle = "gray";
                     ctx.fillRect(spike.x, spike.y, spike.width, spike.height);
+
+                    // Collision detection with spikes
+                    if (
+                        player.x < spike.x + spike.width &&
+                        player.x + player.width > spike.x &&
+                        player.y < spike.y + spike.height &&
+                        player.y + player.height > spike.y
+                    ) {
+                        attempts--;
+                        if (attempts <= 0) {
+                            gameOver();
+                            return;
+                        }
+                    }
                 }
 
                 ctx.fillStyle = "white";
