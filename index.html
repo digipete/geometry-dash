@@ -31,19 +31,23 @@
             canvas.height = 400;
 
             let player = { x: 50, y: 300, width: 30, height: 30, velocityY: 0, jumping: false };
-            let gravity = 0.8;
-            let obstacles = [
-                { x: 300, y: 300, width: 40, height: 40 },
-                { x: 500, y: 250, width: 40, height: 40 },
-                { x: 700, y: 200, width: 40, height: 40 }
-            ];
+            let gravity = 1;
+            let obstacles = [];
             let gameSpeed = 5;
             let running = true;
+            let score = 0;
+            let frames = 0;
 
             function jump(event) {
                 if (event.code === "Space" && !player.jumping) {
-                    player.velocityY = -12;
+                    player.velocityY = -15;
                     player.jumping = true;
+                }
+            }
+
+            function spawnObstacle() {
+                if (frames % 100 === 0) { // Spawns new obstacles continuously
+                    obstacles.push({ x: canvas.width, y: 300, width: 40, height: 40 });
                 }
             }
 
@@ -63,7 +67,8 @@
                 ctx.fillRect(player.x, player.y, player.width, player.height);
 
                 ctx.fillStyle = "red";
-                for (let obs of obstacles) {
+                for (let i = obstacles.length - 1; i >= 0; i--) {
+                    let obs = obstacles[i];
                     obs.x -= gameSpeed;
                     ctx.fillRect(obs.x, obs.y, obs.width, obs.height);
 
@@ -75,9 +80,22 @@
                         player.y + player.height > obs.y
                     ) {
                         running = false;
-                        alert("Game Over! Refresh to try again.");
+                        alert("Game Over! Score: " + score);
+                    }
+
+                    if (obs.x + obs.width < 0) {
+                        obstacles.splice(i, 1);
+                        score++;
                     }
                 }
+
+                // Display Score
+                ctx.fillStyle = "white";
+                ctx.font = "20px Arial";
+                ctx.fillText("Score: " + score, 20, 30);
+
+                frames++;
+                spawnObstacle();
 
                 requestAnimationFrame(update);
             }
@@ -86,6 +104,5 @@
             update();
         });
     </script>
-    <h1>TEST THIS THINGS</h1>
 </body>
 </html>
