@@ -37,6 +37,7 @@
             let running = true;
             let score = 0;
             let frames = 0;
+            let attempts = 3;
 
             function jump(event) {
                 if (event.code === "Space" && !player.jumping) {
@@ -79,8 +80,14 @@
                         player.y < obs.y + obs.height &&
                         player.y + player.height > obs.y
                     ) {
-                        running = false;
-                        alert("Game Over! Score: " + score);
+                        attempts--;
+                        if (attempts <= 0) {
+                            running = false;
+                            alert("Game Over! Score: " + score);
+                        } else {
+                            obstacles = []; // Reset obstacles
+                            player.y = 300; // Reset player position
+                        }
                     }
 
                     if (obs.x + obs.width < 0) {
@@ -89,10 +96,11 @@
                     }
                 }
 
-                // Display Score
+                // Display Score and Attempts
                 ctx.fillStyle = "white";
                 ctx.font = "20px Arial";
                 ctx.fillText("Score: " + score, 20, 30);
+                ctx.fillText("Attempts: " + attempts, canvas.width - 140, 30);
 
                 frames++;
                 spawnObstacle();
