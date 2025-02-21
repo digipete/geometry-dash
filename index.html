@@ -53,7 +53,7 @@
             canvas.width = 800;
             canvas.height = 400;
 
-            let player = { x: 50, y: 300, width: 30, height: 30, velocityY: 0, jumping: false };
+            let player = { x: 50, y: 300, width: 30, height: 30, velocityY: 0, jumping: false, onBlock: false };
             let gravity = 1;
             let obstacles = [];
             let spikes = [];
@@ -88,6 +88,7 @@
                 if (!player.jumping && running) {
                     player.velocityY = -15;
                     player.jumping = true;
+                    player.onBlock = false;
                 }
             }
 
@@ -122,6 +123,7 @@
                 if (player.y >= 300) {
                     player.y = 300;
                     player.jumping = false;
+                    player.onBlock = false;
                 }
 
                 if (score % 5 === 0 && score !== 0) {
@@ -143,6 +145,15 @@
                     }
 
                     if (
+                        player.y + player.height > obs.y &&
+                        player.y + player.height - 5 < obs.y + obs.height &&
+                        player.x + player.width > obs.x &&
+                        player.x < obs.x + obs.width
+                    ) {
+                        player.y = obs.y - player.height;
+                        player.velocityY = 0;
+                        player.jumping = false;
+                    } else if (
                         player.x + player.width > obs.x &&
                         player.x < obs.x + obs.width &&
                         player.y < obs.y + obs.height &&
