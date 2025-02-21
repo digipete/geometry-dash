@@ -1,72 +1,90 @@
-<html>
-  <head>
-<script>
-class Game {
-  constructor() {
-    this.canvas = document.createElement("canvas");
-    this.ctx = this.canvas.getContext("2d");
-    document.body.appendChild(this.canvas);
-    this.canvas.width = 800;
-    this.canvas.height = 400;
-    
-    this.player = { x: 50, y: 300, width: 30, height: 30, velocityY: 0, jumping: false };
-    this.gravity = 1;
-    this.obstacles = [
-      { x: 300, y: 300, width: 40, height: 40 },
-      { x: 500, y: 250, width: 40, height: 40 },
-      { x: 700, y: 200, width: 40, height: 40 }
-    ];
-    this.gameSpeed = 5;
-    this.running = true;
-    
-    window.addEventListener("keydown", (e) => this.jump(e));
-    this.update();
-  }
-  
-  jump(e) {
-    if (e.code === "Space" && !this.player.jumping) {
-      this.player.velocityY = -15;
-      this.player.jumping = true;
-    }
-  }
-  
-  update() {
-    if (!this.running) return;
-    
-    this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
-    
-    this.player.velocityY += this.gravity;
-    this.player.y += this.player.velocityY;
-    if (this.player.y >= 300) {
-      this.player.y = 300;
-      this.player.jumping = false;
-    }
-    
-    this.ctx.fillStyle = "blue";
-    this.ctx.fillRect(this.player.x, this.player.y, this.player.width, this.player.height);
-    
-    this.ctx.fillStyle = "red";
-    for (let obs of this.obstacles) {
-      obs.x -= this.gameSpeed;
-      this.ctx.fillRect(obs.x, obs.y, obs.width, obs.height);
-      
-      if (
-        this.player.x < obs.x + obs.width &&
-        this.player.x + this.player.width > obs.x &&
-        this.player.y < obs.y + obs.height &&
-        this.player.y + this.player.height > obs.y
-      ) {
-        this.running = false;
-        alert("Game Over!");
-      }
-    }
-    
-    requestAnimationFrame(() => this.update());
-  }
-}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Geometry Dash Clone</title>
+    <style>
+        body {
+            margin: 0;
+            overflow: hidden;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            background-color: black;
+        }
+        canvas {
+            border: 2px solid white;
+            background-color: #111;
+        }
+    </style>
+</head>
+<body>
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+            const canvas = document.createElement("canvas");
+            const ctx = canvas.getContext("2d");
+            document.body.appendChild(canvas);
+            
+            canvas.width = 800;
+            canvas.height = 400;
 
-new Game();
-  
-</script>    
-  </head>
+            let player = { x: 50, y: 300, width: 30, height: 30, velocityY: 0, jumping: false };
+            let gravity = 0.8;
+            let obstacles = [
+                { x: 300, y: 300, width: 40, height: 40 },
+                { x: 500, y: 250, width: 40, height: 40 },
+                { x: 700, y: 200, width: 40, height: 40 }
+            ];
+            let gameSpeed = 5;
+            let running = true;
+
+            function jump(event) {
+                if (event.code === "Space" && !player.jumping) {
+                    player.velocityY = -12;
+                    player.jumping = true;
+                }
+            }
+
+            function update() {
+                if (!running) return;
+
+                ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+                player.velocityY += gravity;
+                player.y += player.velocityY;
+                if (player.y >= 300) {
+                    player.y = 300;
+                    player.jumping = false;
+                }
+
+                ctx.fillStyle = "blue";
+                ctx.fillRect(player.x, player.y, player.width, player.height);
+
+                ctx.fillStyle = "red";
+                for (let obs of obstacles) {
+                    obs.x -= gameSpeed;
+                    ctx.fillRect(obs.x, obs.y, obs.width, obs.height);
+
+                    // Collision detection
+                    if (
+                        player.x < obs.x + obs.width &&
+                        player.x + player.width > obs.x &&
+                        player.y < obs.y + obs.height &&
+                        player.y + player.height > obs.y
+                    ) {
+                        running = false;
+                        alert("Game Over! Refresh to try again.");
+                    }
+                }
+
+                requestAnimationFrame(update);
+            }
+
+            window.addEventListener("keydown", jump);
+            update();
+        });
+    </script>
+</body>
 </html>
