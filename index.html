@@ -56,6 +56,7 @@
             let player = { x: 50, y: 300, width: 30, height: 30, velocityY: 0, jumping: false };
             let gravity = 1;
             let obstacles = [];
+            let spikes = [];
             let gameSpeed = 5;
             let running = false;
             let score = 0;
@@ -73,6 +74,8 @@
                 score = 0;
                 attempts = 3;
                 obstacles = [];
+                spikes = [];
+                gameSpeed = 5;
                 running = true;
                 player.y = 300;
                 frames = 0;
@@ -92,7 +95,13 @@
                 if (frames % 100 === 0) { 
                     let heightOptions = [200, 250, 300]; // Different heights for obstacles
                     let obstacleHeight = heightOptions[Math.floor(Math.random() * heightOptions.length)];
-                    obstacles.push({ x: canvas.width, y: obstacleHeight, width: 40, height: 40 });
+                    let isBlackHole = Math.random() < 0.1; // 10% chance of being a black hole
+                    let color = isBlackHole ? "black" : "red";
+                    let obstacleHeightFinal = isBlackHole ? 80 : 40; // Black hole is twice the height
+                    obstacles.push({ x: canvas.width, y: obstacleHeight, width: 40, height: obstacleHeightFinal, color: color, isBlackHole: isBlackHole });
+                }
+                if (Math.random() < 0.05) { // 5% chance of spawning a spike
+                    spikes.push({ x: canvas.width, y: 300, width: 20, height: 20 });
                 }
             }
 
@@ -115,13 +124,18 @@
                     player.jumping = false;
                 }
 
+                // Increase speed after every 5 points scored
+                if (score % 5 === 0 && score !== 0) {
+                    gameSpeed += 0.01;
+                }
+
                 ctx.fillStyle = "blue";
                 ctx.fillRect(player.x, player.y, player.width, player.height);
 
-                ctx.fillStyle = "red";
                 for (let i = obstacles.length - 1; i >= 0; i--) {
                     let obs = obstacles[i];
                     obs.x -= gameSpeed;
+                    ctx.fillStyle = obs.color;
                     ctx.fillRect(obs.x, obs.y, obs.width, obs.height);
 
                     // Collision detection
@@ -131,23 +145,29 @@
                         player.y < obs.y + obs.height &&
                         player.y + player.height > obs.y
                     ) {
-                        attempts--;
-                        if (attempts <= 0) {
+                        if (obs.isBlackHole) {
                             gameOver();
                             return;
                         } else {
-                            obstacles = []; 
-                            player.y = 300; 
+                            attempts--;
+                            if (attempts <= 0) {
+                                gameOver();
+                                return;
+                            } else {
+                                obstacles = []; 
+                                player.y = 300; 
+                            }
                         }
-                    }
-
-                    if (obs.x + obs.width < 0) {
-                        obstacles.splice(i, 1);
-                        score++;
                     }
                 }
 
-                // Display Score and Attempts
+                for (let i = spikes.length - 1; i >= 0; i--) {
+                    let spike = spikes[i];
+                    spike.x -= gameSpeed * 1.5;
+                    ctx.fillStyle = "gray";
+                    ctx.fillRect(spike.x, spike.y, spike.width, spike.height);
+                }
+
                 ctx.fillStyle = "white";
                 ctx.font = "20px Arial";
                 ctx.fillText("Score: " + score, 20, 30);
